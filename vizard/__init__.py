@@ -1,1 +1,1 @@
-from Vizard import Vizard
+from .Vizard import Vizard
