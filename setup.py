@@ -21,7 +21,7 @@ setuptools.setup(
         "matplotlib>=3.1.3",
         "scipy>=1.4.1",
         "seaborn>=0.11.1",
-        "wordcloud==1.7.0",
+        "wordcloud>=1.7.0",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

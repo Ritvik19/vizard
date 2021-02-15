@@ -105,6 +105,7 @@ class Vizard:
 
     def check_missing(self):
         fig, ax = plt.subplots(figsize=(20, 6))
+        fig.suptitle("Missing Values", fontsize=24)
         sns.heatmap(self.data.isnull(), cbar=False, yticklabels=False)
         plt.show()
 
@@ -227,21 +228,23 @@ class Vizard:
 
     def pair_plot(self):
         if self.config.PROBLEM_TYPE == "regression":
-            sns.pairplot(
+            g = sns.pairplot(
                 data=self.data[
                     self.config.CONTINUOUS_INDEPENDENT_VARIABLES
                     + [self.config.DEPENDENT_VARIABLE]
                 ]
             )
+            g.fig.suptitle("Pairplot", fontsize=24, y=1.08)
             plt.show()
         elif self.config.PROBLEM_TYPE == "classification":
-            sns.pairplot(
+            g = sns.pairplot(
                 data=self.data[
                     self.config.CONTINUOUS_INDEPENDENT_VARIABLES
                     + [self.config.DEPENDENT_VARIABLE]
                 ],
                 hue=self.config.DEPENDENT_VARIABLE,
             )
+            g.fig.suptitle("Pairplot", fontsize=24, y=1.08)
             plt.show()
         else:
             pass
@@ -268,6 +271,7 @@ class Vizard:
 
     def corr_plot(self, figsize=(10, 10)):
         fig, ax = plt.subplots(figsize=figsize)
+        fig.suptitle("Correlation Plot", fontsize=24)
 
         corr = self.data.corr()
         mask = np.zeros_like(corr, dtype=np.bool)
@@ -283,6 +287,7 @@ class Vizard:
 
     def chi_sq_plot(self, figsize=(10, 10)):
         fig, ax = plt.subplots(figsize=figsize)
+        fig.suptitle("Chi Square Plot", fontsize=24)
 
         cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
         if self.config.PROBLEM_TYPE == "classification":
