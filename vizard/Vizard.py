@@ -6,6 +6,7 @@ import seaborn as sns
 from wordcloud import WordCloud, STOPWORDS
 from math import ceil
 from itertools import combinations, product
+from collections import Counter
 
 sns.set_style("darkgrid")
 
@@ -358,10 +359,71 @@ class Vizard:
                     )
             plt.show()
 
+    def wordcloud_freq(self):
+        n_rows = ceil(len(self.config.TEXT_VARIABLES) / 2)
+        fig = plt.figure(figsize=(20, 6 * n_rows))
+        for i, col in enumerate(self.config.TEXT_VARIABLES):
+            self._wc_freq(
+                Counter((" ".join(self.data[col].fillna("").values)).split()),
+                col,
+                fig.add_subplot(n_rows, 2, i + 1),
+            )
+        plt.show()
+        if self.config.PROBLEM_TYPE == "classification":
+            n_rows = ceil(
+                (
+                    len(self.config.TEXT_VARIABLES)
+                    * self.data[self.config.DEPENDENT_VARIABLE].nunique()
+                )
+                / 2
+            )
+            fig = plt.figure(figsize=(20, 6 * n_rows))
+            i = 0
+            for col in self.config.TEXT_VARIABLES:
+                for label in sorted(self.data[self.config.DEPENDENT_VARIABLE].unique()):
+                    i += 1
+                    self._wc_freq(
+                        (
+                            Counter(
+                                " ".join(
+                                    self.data[
+                                        self.data[self.config.DEPENDENT_VARIABLE]
+                                        == label
+                                    ][col]
+                                    .fillna("")
+                                    .values
+                                ).split()
+                            )
+                            - Counter(
+                                " ".join(
+                                    self.data[
+                                        self.data[self.config.DEPENDENT_VARIABLE]
+                                        != label
+                                    ][col]
+                                    .fillna("")
+                                    .values
+                                ).split()
+                            )
+                        ),
+                        f"{col} ({label})",
+                        fig.add_subplot(n_rows, 2, i),
+                    )
+            plt.show()
+
     def _wc(self, text, label, ax):
         wordcloud = WordCloud(height=600, width=1000, stopwords=STOPWORDS).generate(
             text
         )
+        ax.imshow(wordcloud)
+        ax.set_title(f"Word Cloud - {label}", fontsize=18)
+        ax.xaxis.set_visible(False)
+        ax.yaxis.set_visible(False)
+        return ax
+
+    def _wc_freq(self, text_freq, label, ax):
+        wordcloud = WordCloud(
+            height=600, width=1000, stopwords=STOPWORDS
+        ).generate_from_frequencies(text_freq)
         ax.imshow(wordcloud)
         ax.set_title(f"Word Cloud - {label}", fontsize=18)
         ax.xaxis.set_visible(False)
