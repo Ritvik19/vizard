@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="vizard",
-    version="0.2.1",
+    version="0.2.2",
     author="Ritvik Rastogi",
     author_email="rastogiritvik99@gmail.com",
     description="Intuitive, Easy and Quick Vizualizations for Data Science Projects",

@@ -48,7 +48,7 @@ After Instatiating the `Vizard` object, you can try different plots for EDA
       viz.count_unique_by_group(class_variable)
 
 ### Target Column Analysis
-Based on the type of problem, perform a univaraite analysis of target column
+Based on the type of problem, perform a univariate analysis of target column
     
     viz.dependent_variable()
 
@@ -66,6 +66,8 @@ Based on the type of problem, preform segmented univariate analysis of all featu
 * Text Variables
   
         viz.wordcloud()
+
+        viz.wordcloud_freq()
 
 ### Bivariate/Multivariate Analysis
 Based on the type of problem, perform bivariate and multivariate analysis on all the feature columns
@@ -97,7 +99,9 @@ Based on the type of variables, perform correaltion analysis on all the feature 
 * Chi Square Plot
   
         viz.chi_sq_plot()
+
 ## Usage
 
 1. [Classification Case](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=54381087)
 2. [Regression Case](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=54381676)
+3. [Text Classification Case](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=54875336)

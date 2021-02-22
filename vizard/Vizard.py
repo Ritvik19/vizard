@@ -12,6 +12,10 @@ sns.set_style("darkgrid")
 
 
 class Vizard:
+    """Vizard object holds the `DataFrame` along with its configurations including the
+    `PROBLEM_TYPE`, `DEPENDENT_VARIABLE`, `CATEGORICAL_INDEPENDENT_VARIABLES`,
+    `CONTINUOUS_INDEPENDENT_VARIABLES`, and `TEXT_VARIABLES`"""
+
     def __init__(self, data, config=None):
         self._data = data
         self._config = config
@@ -105,12 +109,14 @@ class Vizard:
         plt.show()
 
     def check_missing(self):
+        """Plot a heatmap to visualize missing values in the DataFrame"""
         fig, ax = plt.subplots(figsize=(20, 6))
         fig.suptitle("Missing Values", fontsize=24)
         sns.heatmap(self.data.isnull(), cbar=False, yticklabels=False)
         plt.show()
 
     def count_missing(self):
+        """Plot to visualize the count of missing values in each column in the DataFrame"""
         fig = plt.figure(figsize=(20, 4))
         fig.suptitle("Count of Missing Values", fontsize=24)
         ax = self.data.isna().sum().plot.bar()
@@ -121,6 +127,9 @@ class Vizard:
         plt.show()
 
     def count_missing_by_group(self, group_by=None):
+        """Plot to visualize the count of missing values in each column in the DataFrame,
+        grouped by a categorical variable
+        :param group_by: a column in the DataFrame"""
         fig, ax = plt.subplots(figsize=(20, 4))
         fig.suptitle(f"Count of Missing Values Grouped By {group_by}", fontsize=24)
         self.data.drop(group_by, 1).isna().groupby(
@@ -133,6 +142,7 @@ class Vizard:
         plt.show()
 
     def count_unique(self):
+        """Plot to visualize the count of unique values in each column in the DataFrame"""
         fig = plt.figure(figsize=(20, 4))
         fig.suptitle("Count of Unique Values", fontsize=24)
         ax = self.data.nunique().plot.bar()
@@ -143,6 +153,9 @@ class Vizard:
         plt.show()
 
     def count_unique_by_group(self, group_by=None):
+        """Plot to visualize the count of unique values in each column in the DataFrame,
+        grouped by a categorical variable
+        :param group_by: a column in the DataFrame"""
         fig, ax = plt.subplots(figsize=(20, 4))
         fig.suptitle(f"Count of Unique Values Grouped By {group_by}", fontsize=24)
         self.data.groupby(group_by).nunique().T.plot.bar(ax=ax)
@@ -153,6 +166,7 @@ class Vizard:
         plt.show()
 
     def dependent_variable(self):
+        """Based on the type of problem, plot a univariate visualization of target column"""
         if self.config.PROBLEM_TYPE == "regression":
             self.continuous(self.config.DEPENDENT_VARIABLE)
         elif self.config.PROBLEM_TYPE == "classification":
@@ -163,6 +177,7 @@ class Vizard:
             print("Invalid Problem Type")
 
     def pairwise_scatter(self):
+        """Plot pairwise scatter plots to visualize the continuous variables in the dataset"""
         cols = self.config.CONTINUOUS_INDEPENDENT_VARIABLES[:]
         if self.config.PROBLEM_TYPE == "regression":
             cols.append(self.config.DEPENDENT_VARIABLE)
@@ -187,6 +202,8 @@ class Vizard:
         plt.show()
 
     def pairwise_violin(self):
+        """Plot pairwise violin plots to visualize the continuous variables grouped by the
+        categorical variables in the dataset"""
         cat_cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
         if self.config.PROBLEM_TYPE == "classification":
             cat_cols.append(self.config.DEPENDENT_VARIABLE)
@@ -204,6 +221,7 @@ class Vizard:
         plt.show()
 
     def pairwise_crosstabs(self):
+        """Plot pairwise crosstabs plots to visualize the categorical variables in the dataset"""
         cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
         if self.config.PROBLEM_TYPE == "classification":
             cols.append(self.config.DEPENDENT_VARIABLE)
@@ -228,6 +246,7 @@ class Vizard:
         plt.show()
 
     def pair_plot(self):
+        """Plot a pairplot to vizualize the complete DataFrame"""
         if self.config.PROBLEM_TYPE == "regression":
             g = sns.pairplot(
                 data=self.data[
@@ -251,6 +270,7 @@ class Vizard:
             pass
 
     def categorical_variables(self):
+        """Create bivariate visualizations for the categorical variables with the target variable"""
         if self.config.PROBLEM_TYPE == "regression":
             for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES:
                 self.categorical_vs_continuous(col, self.config.DEPENDENT_VARIABLE)
@@ -261,6 +281,7 @@ class Vizard:
             pass
 
     def continuous_variables(self):
+        """Create bivariate visualizations for the continuous variables with the target variable"""
         if self.config.PROBLEM_TYPE == "regression":
             for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES:
                 self.continuous_vs_continuous(col, self.config.DEPENDENT_VARIABLE)
@@ -271,6 +292,7 @@ class Vizard:
             pass
 
     def corr_plot(self, figsize=(10, 10)):
+        """Plot a heatmap to vizualize the correlation between the various continuous columns in the DataFrame"""
         fig, ax = plt.subplots(figsize=figsize)
         fig.suptitle("Correlation Plot", fontsize=24)
 
@@ -287,6 +309,7 @@ class Vizard:
         plt.show()
 
     def chi_sq_plot(self, figsize=(10, 10)):
+        """Plot a heatmap to vizualize the chi 2 value between the varios categorical columns in the DataFrame"""
         fig, ax = plt.subplots(figsize=figsize)
         fig.suptitle("Chi Square Plot", fontsize=24)
 
@@ -324,6 +347,7 @@ class Vizard:
         plt.show()
 
     def wordcloud(self):
+        """Plot word clouds for the text variables and grouped word clouds if the problem is a classification one"""
         n_rows = ceil(len(self.config.TEXT_VARIABLES) / 2)
         fig = plt.figure(figsize=(20, 6 * n_rows))
         for i, col in enumerate(self.config.TEXT_VARIABLES):
@@ -360,6 +384,8 @@ class Vizard:
             plt.show()
 
     def wordcloud_freq(self):
+        """Plot word clouds for the text variables and grouped word clouds for the words unique to each group
+        if the problem is a classification one"""
         n_rows = ceil(len(self.config.TEXT_VARIABLES) / 2)
         fig = plt.figure(figsize=(20, 6 * n_rows))
         for i, col in enumerate(self.config.TEXT_VARIABLES):
