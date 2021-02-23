@@ -1,5 +1,5 @@
 # vizard
-Intuitive, Easy and Quick Vizualizations for Data Science Projects
+Intuitive, Easy and Quick Visualizations for Data Science Projects
 
 [![Downloads](https://pepy.tech/badge/vizard)](https://pepy.tech/project/vizard)
 [![Downloads](https://pepy.tech/badge/vizard/month)](https://pepy.tech/project/vizard)

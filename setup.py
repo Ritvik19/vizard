@@ -8,7 +8,7 @@ setuptools.setup(
     version="0.2.3",
     author="Ritvik Rastogi",
     author_email="rastogiritvik99@gmail.com",
-    description="Intuitive, Easy and Quick Vizualizations for Data Science Projects",
+    description="Intuitive, Easy and Quick Visualizations for Data Science Projects",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Ritvik19",
