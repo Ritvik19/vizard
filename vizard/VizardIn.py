@@ -8,14 +8,14 @@ from scipy.stats import chi2_contingency
 
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 from wordcloud import WordCloud, STOPWORDS
 
-sns.set_style("darkgrid")
 
-
-class Vizard:
-    """Vizard object holds the `DataFrame` along with its configurations including the
+class VizardIn:
+    """VizardIn object holds the `DataFrame` along with its configurations including the
     `PROBLEM_TYPE`, `DEPENDENT_VARIABLE`, `CATEGORICAL_INDEPENDENT_VARIABLES`,
     `CONTINUOUS_INDEPENDENT_VARIABLES`, and `TEXT_VARIABLES`"""
 
@@ -40,133 +40,186 @@ class Vizard:
         self._config = config
 
     def categorical(self, x):
-        fig = plt.figure(figsize=(10, 4))
-        fig.suptitle(f"{x} Distribution", fontsize=24)
-        ax = self.data[x].value_counts().plot.bar()
-        for p in ax.patches:
-            ax.annotate(
-                str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005)
-            )
-        plt.show()
+        fig = px.bar(
+            pd.DataFrame(self.data[x].value_counts()), title=f"{x} Distribution"
+        )
+        fig.show()
 
     def continuous(self, x):
-        fig = plt.figure(figsize=(20, 6))
-        fig.suptitle(f"{x} Distribution", fontsize=24)
-        sns.histplot(self.data[x], kde=False)
-        plt.show()
+        fig = px.histogram(self.data, x=x, title=f"{x} Distribution")
+        fig.show()
 
-    def timeseries(self, x):
-        fig, ax = plt.subplots(figsize=(20, 6))
-        self.data[x].plot(ax=ax)
-        plt.show()
-
-    def categorical_vs_continuous(self, x, y):
-        fig = plt.figure(figsize=(20, 8))
-        ax = [
-            plt.subplot2grid((2, 3), (0, 0), colspan=1),
-            plt.subplot2grid((2, 3), (0, 1), colspan=2),
-            plt.subplot2grid((2, 3), (1, 0), colspan=3),
-        ]
-        fig.suptitle(x, fontsize=18)
-        self.data[x].value_counts().plot.pie(ax=ax[0], autopct="%1.1f%%")
-        ax[0].legend()
-        sns.histplot(data=self.data, x=y, hue=x, kde=False, ax=ax[1])
-        sns.boxplot(y=y, x=x, data=self.data, ax=ax[2])
-        plt.show()
-
-    def categorical_vs_categorical(self, x, y):
-        fig, ax = plt.subplots(1, 2, figsize=(20, 6))
-        fig.suptitle(x, fontsize=18)
-        self.data[x].value_counts().plot.pie(ax=ax[0], autopct="%1.1f%%")
-        ax[0].legend()
-        sns.heatmap(
-            pd.crosstab(index=self.data[y], columns=self.data[x]),
-            ax=ax[1],
-            cmap="Blues",
-            annot=True,
-            square=True,
-            fmt="d",
+    def categorical_vs_continuous(self, col, target):
+        fig = make_subplots(
+            rows=2,
+            cols=3,
+            specs=[[{}, {"colspan": 2}, None], [{"colspan": 3}, None, None]],
         )
-        plt.show()
+        fig.add_trace(
+            go.Bar(
+                x=list(self.data[col].value_counts().index),
+                y=list(self.data[col].value_counts()),
+                name=col,
+            ),
+            row=1,
+            col=1,
+        )
+        for val in self.data[col].unique():
+            fig.add_trace(
+                go.Histogram(
+                    x=self.data[self.data[col] == val][target], name=f"{col}: {val}"
+                ),
+                row=1,
+                col=2,
+            )
+        for val in self.data[col].unique():
+            fig.add_trace(
+                go.Box(
+                    y=self.data[self.data[col] == val][target], name=f"{col}: {val}"
+                ),
+                row=2,
+                col=1,
+            )
+        fig.update_xaxes(title_text=target, row=1, col=2)
+        fig.update_yaxes(title_text=target, row=2, col=1)
+        fig.update_layout(title=f"{col}")
+        fig.show()
 
-    def continuous_vs_continuous(self, x, y):
-        fig, ax = plt.subplots(1, 2, figsize=(20, 6))
-        fig.suptitle(x, fontsize=18)
-        sns.histplot(self.data[x], ax=ax[0], kde=False)
-        sns.scatterplot(x=x, y=y, data=self.data, ax=ax[1])
-        plt.show()
+    def categorical_vs_categorical(self, col, target):
+        fig = make_subplots(
+            rows=1,
+            cols=2,
+        )
+        fig.add_trace(
+            go.Bar(
+                x=list(self.data[col].value_counts().index),
+                y=list(self.data[col].value_counts()),
+                name=col,
+            ),
+            row=1,
+            col=1,
+        )
+        fig.add_trace(
+            go.Heatmap(
+                z=pd.crosstab(index=self.data[target], columns=self.data[col]),
+                name=f"{col}",
+                colorscale="blues",
+            ),
+            row=1,
+            col=2,
+        )
+        fig.update_xaxes(title_text=col, row=1, col=2, showticklabels=False)
+        fig.update_yaxes(title_text=target, row=1, col=2, showticklabels=False)
+        fig.update_layout(title=f"{col}")
+        fig.show()
 
-    def continuous_vs_categorical(self, x, y):
-        fig = plt.figure(figsize=(20, 12))
-        ax = [
-            plt.subplot2grid((3, 3), (0, 0), colspan=3),
-            plt.subplot2grid((3, 3), (1, 0), colspan=3),
-            plt.subplot2grid((3, 3), (2, 0)),
-            plt.subplot2grid((3, 3), (2, 1), colspan=2),
-        ]
-        fig.suptitle(x, fontsize=18)
-        sns.histplot(self.data[x], kde=False, ax=ax[0])
-        sns.histplot(x=x, hue=y, data=self.data, kde=False, ax=ax[1])
-        sns.boxplot(x=self.data[x], ax=ax[2])
-        sns.boxplot(x=y, y=x, data=self.data, ax=ax[3])
-        plt.show()
+    def continuous_vs_continuous(self, col, target):
+        fig = make_subplots(
+            rows=3,
+            cols=3,
+            specs=[
+                [{"colspan": 3}, None, None],
+                [{"rowspan": 2}, {"colspan": 2, "rowspan": 2}, None],
+                [None, None, None],
+            ],
+        )
+        fig.add_trace(go.Histogram(x=self.data[col], name=f"{col}"), row=1, col=1)
+        fig.add_trace(go.Box(y=self.data[col], name=f"{col}"), row=2, col=1)
+        fig.add_trace(
+            go.Scatter(
+                x=self.data[col], y=self.data[target], mode="markers", name=f"{col}"
+            ),
+            row=2,
+            col=2,
+        )
+        fig.update_xaxes(title_text=col, row=1, col=1)
+        fig.update_xaxes(title_text=col, row=2, col=2)
+        fig.update_yaxes(title_text=target, row=2, col=2)
+        fig.show()
+
+    def continuous_vs_categorical(self, col, target):
+        fig = make_subplots(
+            rows=3,
+            cols=3,
+            specs=[
+                [{"rowspan": 2}, {"colspan": 2}, None],
+                [None, {"colspan": 2}, None],
+                [{"colspan": 3}, None, None],
+            ],
+        )
+        fig.add_trace(
+            go.Box(
+                y=self.data[col],
+                name=col,
+            ),
+            row=1,
+            col=1,
+        )
+        fig.add_trace(go.Histogram(x=self.data[col], name=col), row=1, col=2)
+        for val in self.data[target].unique():
+            fig.add_trace(
+                go.Histogram(
+                    x=self.data[self.data[target] == val][col], name=f"{target}: {val}"
+                ),
+                row=2,
+                col=2,
+            )
+        for val in self.data[target].unique():
+            fig.add_trace(
+                go.Box(
+                    y=self.data[self.data[target] == val][col], name=f"{target}: {val}"
+                ),
+                row=3,
+                col=1,
+            )
+        fig.update_layout(title=f"{col}")
+        fig.show()
 
     def check_missing(self):
         """Plot a heatmap to visualize missing values in the DataFrame"""
-        fig, ax = plt.subplots(figsize=(20, 6))
-        fig.suptitle("Missing Values", fontsize=24)
-        sns.heatmap(self.data.isnull(), cbar=False, yticklabels=False)
-        plt.show()
+        fig = px.imshow(
+            self.data.isnull(), color_continuous_scale="viridis", title="Missing Values"
+        )
+        fig.update_yaxes(visible=False, showticklabels=False)
+        fig.update(layout_coloraxis_showscale=False)
+        fig.show()
 
     def count_missing(self):
         """Plot to visualize the count of missing values in each column in the DataFrame"""
-        fig = plt.figure(figsize=(20, 4))
-        fig.suptitle("Count of Missing Values", fontsize=24)
-        ax = self.data.isna().sum().plot.bar()
-        for p in ax.patches:
-            ax.annotate(
-                str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005)
-            )
-        plt.show()
+        fig = px.bar(
+            pd.DataFrame(self.data.isnull().sum(), columns=["Missing Count"]),
+            title="Count of Missing Values",
+        )
+        fig.show()
 
     def count_missing_by_group(self, group_by=None):
         """Plot to visualize the count of missing values in each column in the DataFrame,
         grouped by a categorical variable
         :param group_by: a column in the DataFrame"""
-        fig, ax = plt.subplots(figsize=(20, 4))
-        fig.suptitle(f"Count of Missing Values Grouped By {group_by}", fontsize=24)
-        self.data.drop(group_by, 1).isna().groupby(
-            self.data[group_by], sort=False
-        ).sum().T.plot.bar(ax=ax)
-        for p in ax.patches:
-            ax.annotate(
-                str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005)
-            )
-        plt.show()
+        fig = px.bar(
+            self.data.drop(group_by, 1)
+            .isna()
+            .groupby(self.data[group_by], sort=False)
+            .sum()
+            .T,
+            title=f"Count of Missing Values grouped by {group_by}",
+        )
+        fig.show()
 
     def count_unique(self):
         """Plot to visualize the count of unique values in each column in the DataFrame"""
-        fig = plt.figure(figsize=(20, 4))
-        fig.suptitle("Count of Unique Values", fontsize=24)
-        ax = self.data.nunique().plot.bar()
-        for p in ax.patches:
-            ax.annotate(
-                str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005)
-            )
-        plt.show()
+        fig = px.bar(self.data.nunique(), title="Count of Unique Values")
+        fig.show()
 
     def count_unique_by_group(self, group_by=None):
         """Plot to visualize the count of unique values in each column in the DataFrame,
         grouped by a categorical variable
         :param group_by: a column in the DataFrame"""
-        fig, ax = plt.subplots(figsize=(20, 4))
-        fig.suptitle(f"Count of Unique Values Grouped By {group_by}", fontsize=24)
-        self.data.groupby(group_by).nunique().T.plot.bar(ax=ax)
-        for p in ax.patches:
-            ax.annotate(
-                str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005)
-            )
-        plt.show()
+        fig = px.bar(
+            self.data.groupby(group_by).nunique().T,
+            title=f"Count of Unique Values Grouped By {group_by}",
+        )
+        fig.show()
 
     def dependent_variable(self):
         """Based on the type of problem, plot a univariate visualization of target column"""
@@ -174,35 +227,28 @@ class Vizard:
             self.continuous(self.config.DEPENDENT_VARIABLE)
         elif self.config.PROBLEM_TYPE == "classification":
             self.categorical(self.config.DEPENDENT_VARIABLE)
-        elif self.config.PROBLEM_TYPE == "time_series":
-            self.timeseries(self.config.DEPENDENT_VARIABLE)
         else:
             print("Invalid Problem Type")
 
     def pairwise_scatter(self):
         """Plot pairwise scatter plots to visualize the continuous variables in the dataset"""
-        cols = self.config.CONTINUOUS_INDEPENDENT_VARIABLES[:]
-        if self.config.PROBLEM_TYPE == "regression":
-            cols.append(self.config.DEPENDENT_VARIABLE)
-
-        comb = list(combinations(cols, 2))
-
-        n_plots = len(comb)
-        n_rows = ceil(n_plots / 2)
-
-        fig = plt.figure(figsize=(20, 6 * n_rows))
+        comb = list(combinations(self.config.CONTINUOUS_INDEPENDENT_VARIABLES, 2))
         for i, (x, y) in enumerate(comb):
-            ax = fig.add_subplot(n_rows, 2, i + 1)
-            if self.config.PROBLEM_TYPE == "regression":
-                sns.scatterplot(data=self.data, x=x, y=y, ax=ax)
-            elif self.config.PROBLEM_TYPE == "classification":
-                sns.scatterplot(
-                    data=self.data, x=x, y=y, hue=self.config.DEPENDENT_VARIABLE, ax=ax
-                )
-            else:
-                pass
-            ax.set_title(f"{x} vs {y}", fontsize=18)
-        plt.show()
+            if self.config.PROBLEM_TYPE == "classification":
+                px.scatter(
+                    self.data,
+                    x=x,
+                    y=y,
+                    color=self.config.DEPENDENT_VARIABLE,
+                    title=f"{y} vs {x}",
+                ).show()
+            elif self.config.PROBLEM_TYPE == "regression":
+                px.scatter(
+                    self.data,
+                    x=x,
+                    y=y,
+                    title=f"{y} vs {x}",
+                ).show()
 
     def pairwise_violin(self):
         """Plot pairwise violin plots to visualize the continuous variables grouped by the
@@ -211,17 +257,10 @@ class Vizard:
         if self.config.PROBLEM_TYPE == "classification":
             cat_cols.append(self.config.DEPENDENT_VARIABLE)
 
-        comb = list(product(self.config.CONTINUOUS_INDEPENDENT_VARIABLES, cat_cols))
+        comb = list(product(cat_cols, self.config.CONTINUOUS_INDEPENDENT_VARIABLES))
 
-        n_plots = len(comb)
-        n_rows = ceil(n_plots / 2)
-
-        fig = plt.figure(figsize=(20, 6 * n_rows))
         for i, (x, y) in enumerate(comb):
-            ax = fig.add_subplot(n_rows, 2, i + 1)
-            sns.violinplot(data=self.data, x=y, y=x)
-            ax.set_title(f"{y} vs {x}", fontsize=18)
-        plt.show()
+            px.violin(self.data, y=y, x=x, box=True, title=f"{y} vs {x}").show()
 
     def pairwise_crosstabs(self):
         """Plot pairwise crosstabs plots to visualize the categorical variables in the dataset"""
@@ -231,46 +270,28 @@ class Vizard:
 
         comb = list(combinations(cols, 2))
 
-        n_plots = len(comb)
-        n_rows = ceil(n_plots / 2)
-
-        fig = plt.figure(figsize=(20, 6 * n_rows))
         for i, (x, y) in enumerate(comb):
-            ax = fig.add_subplot(n_rows, 2, i + 1)
-            sns.heatmap(
+            px.imshow(
                 pd.crosstab(index=self.data[y], columns=self.data[x]),
-                ax=ax,
-                cmap="Blues",
-                annot=True,
-                square=True,
-                fmt="d",
-            )
-            ax.set_title(f"{y} vs {x}", fontsize=18)
-        plt.show()
+                color_continuous_scale="blues",
+                title=f"{y} vs {x}",
+            ).show()
 
     def pair_plot(self):
         """Plot a pairplot to vizualize the complete DataFrame"""
-        if self.config.PROBLEM_TYPE == "regression":
-            g = sns.pairplot(
-                data=self.data[
-                    self.config.CONTINUOUS_INDEPENDENT_VARIABLES
-                    + [self.config.DEPENDENT_VARIABLE]
-                ]
-            )
-            g.fig.suptitle("Pairplot", fontsize=24, y=1.08)
-            plt.show()
-        elif self.config.PROBLEM_TYPE == "classification":
-            g = sns.pairplot(
-                data=self.data[
-                    self.config.CONTINUOUS_INDEPENDENT_VARIABLES
-                    + [self.config.DEPENDENT_VARIABLE]
-                ],
-                hue=self.config.DEPENDENT_VARIABLE,
-            )
-            g.fig.suptitle("Pairplot", fontsize=24, y=1.08)
-            plt.show()
-        else:
-            pass
+        if self.config.PROBLEM_TYPE == "classification":
+            px.scatter_matrix(
+                self.data,
+                dimensions=self.config.CONTINUOUS_INDEPENDENT_VARIABLES,
+                color=self.config.DEPENDENT_VARIABLE,
+                title="Pair Plot",
+            ).show()
+        elif self.config.PROBLEM_TYPE == "regression":
+            px.scatter_matrix(
+                self.data,
+                dimensions=self.config.CONTINUOUS_INDEPENDENT_VARIABLES,
+                title="Pair Plot",
+            ).show()
 
     def categorical_variables(self):
         """Create bivariate visualizations for the categorical variables with the target variable"""
@@ -294,27 +315,16 @@ class Vizard:
         else:
             pass
 
-    def corr_plot(self, figsize=(10, 10)):
+    def corr_plot(self):
         """Plot a heatmap to vizualize the correlation between the various continuous columns in the DataFrame"""
-        fig, ax = plt.subplots(figsize=figsize)
-        fig.suptitle("Correlation Plot", fontsize=24)
-
         corr = self.data.corr()
-        mask = np.zeros_like(corr, dtype=np.bool)
-        mask[np.triu_indices_from(mask)] = True
-        mask[np.diag_indices_from(mask)] = True
-
-        annot = True if len(corr) <= 10 else False
-
-        sns.heatmap(
-            corr, mask=mask, cmap="RdBu", ax=ax, annot=annot, square=True, center=0
+        fig = px.imshow(
+            corr, color_continuous_scale="blues", title="Pearson Correlation"
         )
-        plt.show()
+        fig.show()
 
     def chi_sq_plot(self, figsize=(10, 10)):
         """Plot a heatmap to vizualize the chi 2 value between the various categorical columns in the DataFrame"""
-        fig, ax = plt.subplots(figsize=figsize)
-        fig.suptitle("Chi Square Plot", fontsize=24)
 
         cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
         if self.config.PROBLEM_TYPE == "classification":
@@ -331,23 +341,11 @@ class Vizard:
                 chi_sq_table[i][j] = p
 
         chi_sq_table = pd.DataFrame(chi_sq_table, columns=cols, index=cols)
-
-        mask = np.zeros_like(chi_sq_table, dtype=np.bool)
-        mask[np.triu_indices_from(mask)] = True
-        mask[np.diag_indices_from(mask)] = True
-
-        annot = True if len(chi_sq_table) <= 10 else False
-
-        sns.heatmap(
-            chi_sq_table,
-            mask=mask,
-            cmap="Blues_r",
-            ax=ax,
-            annot=annot,
-            square=True,
-            center=0.05,
+        fig = px.imshow(
+            chi_sq_table, color_continuous_scale="blues", title="Chi Square Values"
         )
-        plt.show()
+
+        fig.show()
 
     def wordcloud(self):
         """Plot word clouds for the text variables and grouped word clouds if the problem is a classification one"""

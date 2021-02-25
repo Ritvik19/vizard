@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="vizard",
-    version="0.2.3",
+    version="1.0.0",
     author="Ritvik Rastogi",
     author_email="rastogiritvik99@gmail.com",
-    description="Intuitive, Easy and Quick Visualizations for Data Science Projects",
+    description="Intuitive, Interactive, Easy and Quick Visualizations for Data Science Projects",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Ritvik19",
@@ -22,6 +22,7 @@ setuptools.setup(
         "scipy>=1.4.1",
         "seaborn>=0.11.1",
         "wordcloud>=1.7.0",
+        "plotly>=4.9.0",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

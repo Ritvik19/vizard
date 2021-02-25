@@ -1,5 +1,5 @@
 # vizard
-Intuitive, Easy and Quick Visualizations for Data Science Projects
+Intuitive, Interactive, Easy and Quick Visualizations for Data Science Projects
 
 [![Downloads](https://pepy.tech/badge/vizard)](https://pepy.tech/project/vizard)
 [![Downloads](https://pepy.tech/badge/vizard/month)](https://pepy.tech/project/vizard)
@@ -16,7 +16,7 @@ or
 ## Documentation
 
 ### Instantiate Vizard Object
-The Vizard object holds the `DataFrame` along with its configurations including the `PROBLEM_TYPE`, `DEPENDENT_VARIABLE`, `CATEGORICAL_INDEPENDENT_VARIABLES`, `CONTINUOUS_INDEPENDENT_VARIABLES`, and `TEXT_VARIABLES`
+The Vizard or VizardIn object holds the `DataFrame` along with its configurations including the `PROBLEM_TYPE`, `DEPENDENT_VARIABLE`, `CATEGORICAL_INDEPENDENT_VARIABLES`, `CONTINUOUS_INDEPENDENT_VARIABLES`, and `TEXT_VARIABLES`
 
     import vizard
 
@@ -28,6 +28,8 @@ The Vizard object holds the `DataFrame` along with its configurations including 
         TEXT_VARIABLES = [text features]
 
     viz = vizard.Vizard(df, config)
+    # for interactive plots use:
+    viz = vizard.VizardIn(df, config)
 
 ### Exploratory Data Analysis
 After Instatiating the `Vizard` object, you can try different plots for EDA
