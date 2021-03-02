@@ -4,7 +4,8 @@ import pandas as pd
 from math import ceil
 from itertools import combinations, product
 from collections import Counter
-from scipy.stats import chi2_contingency
+from scipy.stats import chi2_contingency, pointbiserialr
+from sklearn.preprocessing import LabelEncoder
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -193,15 +194,7 @@ class Vizard:
         fig = plt.figure(figsize=(20, 6 * n_rows))
         for i, (x, y) in enumerate(comb):
             ax = fig.add_subplot(n_rows, 2, i + 1)
-            if self.config.PROBLEM_TYPE == "regression":
-                sns.scatterplot(data=self.data, x=x, y=y, ax=ax)
-            elif self.config.PROBLEM_TYPE == "classification":
-                sns.scatterplot(
-                    data=self.data, x=x, y=y, hue=self.config.DEPENDENT_VARIABLE, ax=ax
-                )
-            else:
-                pass
-            ax.set_title(f"{x} vs {y}", fontsize=18)
+            sns.scatterplot(data=self.data, x=x, y=y, ax=ax)
         plt.show()
 
     def pairwise_violin(self):
@@ -294,12 +287,14 @@ class Vizard:
         else:
             pass
 
-    def corr_plot(self, figsize=(10, 10)):
-        """Plot a heatmap to vizualize the correlation between the various continuous columns in the DataFrame"""
+    def corr_plot(self, figsize=(10, 10), method='pearson'):
+        """Plot a heatmap to vizualize the correlation between the various continuous columns in the DataFrame
+            :param method: the method of correlation {'pearson', 'kendall', 'spearman'}
+        """
         fig, ax = plt.subplots(figsize=figsize)
         fig.suptitle("Correlation Plot", fontsize=24)
 
-        corr = self.data.corr()
+        corr = self.data.corr(method=method)
         mask = np.zeros_like(corr, dtype=np.bool)
         mask[np.triu_indices_from(mask)] = True
         mask[np.diag_indices_from(mask)] = True
@@ -311,7 +306,34 @@ class Vizard:
         )
         plt.show()
 
-    def chi_sq_plot(self, figsize=(10, 10)):
+    def point_biserial_plot(self, figsize=(10, 10)):
+        """Plot a heatmap to visualize point biserial correaltion between continuous and categorical variables"""
+        num_cols = self.config.CONTINUOUS_INDEPENDENT_VARIABLES[:]
+        if self.config.PROBLEM_TYPE == 'regression':
+            num_cols.append(self.config.DEPENDENT_VARIABLE)
+        cat_cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
+        if self.config.PROBLEM_TYPE == 'classification':
+            cat_cols.append(self.config.DEPENDENT_VARIABLE)
+
+        fig, ax = plt.subplots(figsize=figsize)
+        fig.suptitle("Point Biserial Plot", fontsize=24)
+
+        pb_table = np.zeros((len(cat_cols), len(num_cols)))
+        for i in range(len(cat_cols)):
+            for j in range(len(num_cols)):
+                df_ = self.data.dropna(subset=[cat_cols[i], num_cols[j]])
+                pb_table[i][j] = pointbiserialr(
+                    LabelEncoder().fit_transform(df_[cat_cols[i]]), df_[num_cols[j]]
+                )[0]
+        
+        annot = True if max(pb_table.shape) <= 10 else False
+
+        sns.heatmap(
+            pb_table, cmap="RdBu", ax=ax, annot=annot, square=True, center=0
+        )
+        plt.show()
+
+    def chi_sq_plot(self, statistic='Chi Sq', figsize=(10, 10)):
         """Plot a heatmap to vizualize the chi 2 value between the various categorical columns in the DataFrame"""
         fig, ax = plt.subplots(figsize=figsize)
         fig.suptitle("Chi Square Plot", fontsize=24)
@@ -321,25 +343,34 @@ class Vizard:
             cols.append(self.config.DEPENDENT_VARIABLE)
 
         n = len(cols)
-        chi_sq_table = np.zeros((n, n))
+        chi_table = np.zeros((n, n))
 
         for i in range(n):
             for j in range(n):
-                stat, p, dof, expected = chi2_contingency(
-                    pd.crosstab(index=self.data[cols[i]], columns=self.data[cols[j]])
-                )
-                chi_sq_table[i][j] = p
+                crss_tab = pd.crosstab(index=self.data[cols[i]], columns=self.data[cols[j]])
+                chi2 = chi2_contingency(crss_tab)[0]
+                crss_sum = np.sum(np.sum(crss_tab))
+                if statistic == 'Chi Sq':
+                    chi_table[i][j] = chi2
+                elif statistic == 'Phi':
+                    chi_table[i][j] = np.sqrt(chi2/crss_sum)
+                elif statistic == "Cramer's V":
+                    chi_table[i][j] = np.sqrt(chi2 / (crss_sum * (min(crss_tab.shape) - 1)))
+                elif statistic == "Tschuprow's T":
+                    chi_table[i][j] = np.sqrt(chi2 / (crss_sum * np.sqrt((crss_tab.shape[0] - 1)*(crss_tab.shape[1] - 1))))
+                elif statistic == 'Contingency Coefficient':
+                    chi_table[i][j] = np.sqrt(chi2/(crss_sum + chi2))
 
-        chi_sq_table = pd.DataFrame(chi_sq_table, columns=cols, index=cols)
+        chi_table = pd.DataFrame(chi_table, columns=cols, index=cols)
 
-        mask = np.zeros_like(chi_sq_table, dtype=np.bool)
+        mask = np.zeros_like(chi_table, dtype=np.bool)
         mask[np.triu_indices_from(mask)] = True
         mask[np.diag_indices_from(mask)] = True
 
-        annot = True if len(chi_sq_table) <= 10 else False
+        annot = True if len(chi_table) <= 10 else False
 
         sns.heatmap(
-            chi_sq_table,
+            chi_table,
             mask=mask,
             cmap="Blues_r",
             ax=ax,
@@ -458,3 +489,75 @@ class Vizard:
         ax.xaxis.set_visible(False)
         ax.yaxis.set_visible(False)
         return ax
+
+    def trivariate_bubbleplot(self, x, y, s, figsize=(10, 10)):
+        """Plot a trivariate bubbleplot with three continuous variables
+        :param x: continuous variable
+        :param y: continuous variable
+        :param s: continuous variable
+        """
+        num_cols = self.config.CONTINUOUS_INDEPENDENT_VARIABLES[:]
+        if self.config.PROBLEM_TYPE == 'regression':
+            num_cols.append(self.config.DEPENDENT_VARIABLE)
+        cat_cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
+        if self.config.PROBLEM_TYPE == 'classification':
+            cat_cols.append(self.config.DEPENDENT_VARIABLE)
+        if x in num_cols and y in num_cols and s in num_cols:
+            fig, ax = plt.subplots(figsize=figsize)
+            sns.scatterplot(
+                data=self.data,
+                x=x,
+                y=y,
+                size=s, ax=ax
+            )
+            fig.suptitle(f"{y} vs {x} vs {s}", fontsize=18)
+        else:
+            print('x, y and s should be continuous variables')
+
+    def trivariate_scatterplot(self, x, y, c, figsize=(10, 10)):
+        """Plot a trivariate scatterplot with two continuous variables and a categorical variable
+        :param x: continuous variable
+        :param y: continuous variable
+        :param c: categorical variable
+        """
+        num_cols = self.config.CONTINUOUS_INDEPENDENT_VARIABLES[:]
+        if self.config.PROBLEM_TYPE == 'regression':
+            num_cols.append(self.config.DEPENDENT_VARIABLE)
+        cat_cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
+        if self.config.PROBLEM_TYPE == 'classification':
+            cat_cols.append(self.config.DEPENDENT_VARIABLE)
+        if x in num_cols and y in num_cols and c in cat_cols:
+            fig, ax = plt.subplots(figsize=figsize)
+            sns.scatterplot(
+                data=self.data,
+                x=x,
+                y=y,
+                hue=c, ax=ax
+            )
+            fig.suptitle(f"{y} vs {x} vs {c}", fontsize=18)
+        else:
+            print('x and y should be continuous variables and c should be a categorical variable')
+
+    def trivariate_violinplot(self, x, y, c, figsize=(10, 10)):
+        """Plot a trivariate violinplot with two categorical variables and a continuous variable
+        :param x: categorical variable
+        :param y: continuous variable
+        :param c: categorical variable
+        """
+        num_cols = self.config.CONTINUOUS_INDEPENDENT_VARIABLES[:]
+        if self.config.PROBLEM_TYPE == 'regression':
+            num_cols.append(self.config.DEPENDENT_VARIABLE)
+        cat_cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
+        if self.config.PROBLEM_TYPE == 'classification':
+            cat_cols.append(self.config.DEPENDENT_VARIABLE)
+        if x in cat_cols and y in num_cols and c in cat_cols:
+            fig, ax = plt.subplots(figsize=figsize)
+            sns.violinplot(
+                data=self.data,
+                x=x,
+                y=y,
+                hue=c, ax=ax
+            )
+            fig.suptitle(f"{y} vs {x} vs {c}", fontsize=18)
+        else:
+            print('x and c should be categorical variables and y should be a continuous variable')        

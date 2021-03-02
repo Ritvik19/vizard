@@ -75,8 +75,8 @@ Based on the type of problem, preform segmented univariate analysis of all featu
 
         viz.wordcloud_freq()
 
-### Bivariate/Multivariate Analysis
-Based on the type of problem, perform bivariate and multivariate analysis on all the feature columns
+### Bivariate Analysis
+Based on the type of variables, perform bivariate analysis on all the feature columns
 
 * Pairwise Scatter
   
@@ -89,6 +89,21 @@ Based on the type of problem, perform bivariate and multivariate analysis on all
 * Pairwise Cross Tabs
   
         viz.pairwise_crosstabs()
+
+### Trivariate Analysis
+Based on the type of variables, perform trivariate analysis on any of the feature columns
+
+* Trivariate Bubble (Continuous vs Continuous vs Continuous)
+  
+        viz.trivariate_bubble(x, y, s)
+
+* Trivariate Scatter (Continuous vs Continuous vs Categorical)
+    
+        viz.trivariate_scatter(x, y, c)
+
+* Trivariate Violin (Categorical vs Continuous vs Categorical)
+  
+        viz.trivariate_violin(x, y, c)
 
 
 ### Correlation Analysis
