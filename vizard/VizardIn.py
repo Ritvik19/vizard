@@ -292,10 +292,14 @@ class VizardIn:
         """Create bivariate visualizations for the categorical variables with the target variable"""
         if self.config.PROBLEM_TYPE == "regression":
             for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES:
-                self.categorical_vs_continuous(col, self.config.DEPENDENT_VARIABLE)
+                self.categorical_vs_continuous(
+                    col, self.config.DEPENDENT_VARIABLE
+                ).show()
         elif self.config.PROBLEM_TYPE == "classification":
             for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES:
-                self.categorical_vs_categorical(col, self.config.DEPENDENT_VARIABLE)
+                self.categorical_vs_categorical(
+                    col, self.config.DEPENDENT_VARIABLE
+                ).show()
         else:
             pass
 
@@ -303,10 +307,14 @@ class VizardIn:
         """Create bivariate visualizations for the continuous variables with the target variable"""
         if self.config.PROBLEM_TYPE == "regression":
             for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES:
-                self.continuous_vs_continuous(col, self.config.DEPENDENT_VARIABLE)
+                self.continuous_vs_continuous(
+                    col, self.config.DEPENDENT_VARIABLE
+                ).show()
         elif self.config.PROBLEM_TYPE == "classification":
             for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES:
-                self.continuous_vs_categorical(col, self.config.DEPENDENT_VARIABLE)
+                self.continuous_vs_categorical(
+                    col, self.config.DEPENDENT_VARIABLE
+                ).show()
         else:
             pass
 

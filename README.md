@@ -125,7 +125,7 @@ Based on the type of variables, perform correaltion analysis on all the feature 
 
 ## Usage
 
-1. [Classification Case](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=54381087)
+1. [Classification Case](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=57788558)
 2. [Regression Case](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=54381676)
 3. [Text Classification Case](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=54875336)
 4. [Classification Case (Interactive)](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=55224811)

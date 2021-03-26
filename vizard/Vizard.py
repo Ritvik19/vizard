@@ -197,6 +197,7 @@ class Vizard:
         for i, (x, y) in enumerate(comb):
             ax = fig.add_subplot(n_rows, 2, i + 1)
             sns.scatterplot(data=self.data, x=x, y=y, ax=ax)
+            ax.set_title(f"{y} vs {x}", fontsize=18)
         return fig if return_fig else plt.show() if fig is not None else None
 
     def pairwise_violin(self, return_fig=True):
@@ -329,7 +330,7 @@ class Vizard:
                 )[0]
 
         annot = True if max(pb_table.shape) <= 10 else False
-
+        pb_table = pd.DataFrame(pb_table, columns=num_cols, index=cat_cols)
         sns.heatmap(pb_table, cmap="RdBu", ax=ax, annot=annot, square=True, center=0)
         return fig if return_fig else plt.show() if fig is not None else None
 

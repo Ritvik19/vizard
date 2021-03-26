@@ -42,6 +42,7 @@ def test_clf():
     viz.corr_plot();
     viz.pair_plot();
     viz.chi_sq_plot();
+    viz.point_biserial_plot();
 
 
 def test_reg():
@@ -69,3 +70,4 @@ def test_reg():
     viz.corr_plot();
     viz.pair_plot();
     viz.chi_sq_plot();
+    viz.point_biserial_plot();
