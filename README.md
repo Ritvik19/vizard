@@ -125,8 +125,8 @@ Based on the type of variables, perform correaltion analysis on all the feature 
 
 ## Usage
 
-1. [Classification Case](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=57788558)
-2. [Regression Case](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=54381676)
-3. [Text Classification Case](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=54875336)
-4. [Classification Case (Interactive)](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=55224811)
-5. [Regression Case (Interactive)](https://www.kaggle.com/ritvik1909/vizard-usage?scriptVersionId=55225752)
+1. [Classification Case](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Classification%20Case.ipynb)
+2. [Regression Case](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Regression%20Case.ipynb)
+3. [Text Classification Case](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Text%20Classification%20Case.ipynb)
+4. [Classification Case (Interactive)](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Classification%20Interactive%20Case.ipynb)
+5. [Regression Case (Interactive)](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Regression%20Interactive%20Case.ipynb)
