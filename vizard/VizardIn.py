@@ -44,13 +44,13 @@ class VizardIn:
         fig = px.bar(
             pd.DataFrame(self.data[x].value_counts()), title=f"{x} Distribution"
         )
-        fig.show()
+        return fig
 
     def continuous(self, x):
         fig = px.histogram(self.data, x=x, title=f"{x} Distribution")
-        fig.show()
+        return fig
 
-    def categorical_vs_continuous(self, col, target):
+    def categorical_vs_continuous(self, col, target, return_fig=True):
         fig = make_subplots(
             rows=2,
             cols=3,
@@ -84,9 +84,9 @@ class VizardIn:
         fig.update_xaxes(title_text=target, row=1, col=2)
         fig.update_yaxes(title_text=target, row=2, col=1)
         fig.update_layout(title=f"{col}")
-        fig.show()
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def categorical_vs_categorical(self, col, target):
+    def categorical_vs_categorical(self, col, target, return_fig=True):
         fig = make_subplots(
             rows=1,
             cols=2,
@@ -112,9 +112,9 @@ class VizardIn:
         fig.update_xaxes(title_text=col, row=1, col=2, showticklabels=False)
         fig.update_yaxes(title_text=target, row=1, col=2, showticklabels=False)
         fig.update_layout(title=f"{col}")
-        fig.show()
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def continuous_vs_continuous(self, col, target):
+    def continuous_vs_continuous(self, col, target, return_fig=True):
         fig = make_subplots(
             rows=3,
             cols=3,
@@ -136,9 +136,9 @@ class VizardIn:
         fig.update_xaxes(title_text=col, row=1, col=1)
         fig.update_xaxes(title_text=col, row=2, col=2)
         fig.update_yaxes(title_text=target, row=2, col=2)
-        fig.show()
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def continuous_vs_categorical(self, col, target):
+    def continuous_vs_categorical(self, col, target, return_fig=True):
         fig = make_subplots(
             rows=3,
             cols=3,
@@ -174,26 +174,26 @@ class VizardIn:
                 col=1,
             )
         fig.update_layout(title=f"{col}")
-        fig.show()
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def check_missing(self):
+    def check_missing(self, return_fig=True):
         """Plot a heatmap to visualize missing values in the DataFrame"""
         fig = px.imshow(
             self.data.isnull(), color_continuous_scale="viridis", title="Missing Values"
         )
         fig.update_yaxes(visible=False, showticklabels=False)
         fig.update(layout_coloraxis_showscale=False)
-        fig.show()
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def count_missing(self):
+    def count_missing(self, return_fig=True):
         """Plot to visualize the count of missing values in each column in the DataFrame"""
         fig = px.bar(
             pd.DataFrame(self.data.isnull().sum(), columns=["Missing Count"]),
             title="Count of Missing Values",
         )
-        fig.show()
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def count_missing_by_group(self, group_by=None):
+    def count_missing_by_group(self, group_by=None, return_fig=True):
         """Plot to visualize the count of missing values in each column in the DataFrame,
         grouped by a categorical variable
         :param group_by: a column in the DataFrame"""
@@ -205,14 +205,14 @@ class VizardIn:
             .T,
             title=f"Count of Missing Values grouped by {group_by}",
         )
-        fig.show()
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def count_unique(self):
+    def count_unique(self, return_fig=True):
         """Plot to visualize the count of unique values in each column in the DataFrame"""
         fig = px.bar(self.data.nunique(), title="Count of Unique Values")
-        fig.show()
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def count_unique_by_group(self, group_by=None):
+    def count_unique_by_group(self, group_by=None, return_fig=True):
         """Plot to visualize the count of unique values in each column in the DataFrame,
         grouped by a categorical variable
         :param group_by: a column in the DataFrame"""
@@ -220,16 +220,18 @@ class VizardIn:
             self.data.groupby(group_by).nunique().T,
             title=f"Count of Unique Values Grouped By {group_by}",
         )
-        fig.show()
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def dependent_variable(self):
+    def dependent_variable(self, return_fig=True):
         """Based on the type of problem, plot a univariate visualization of target column"""
         if self.config.PROBLEM_TYPE == "regression":
-            self.continuous(self.config.DEPENDENT_VARIABLE)
+            fig = self.continuous(self.config.DEPENDENT_VARIABLE)
         elif self.config.PROBLEM_TYPE == "classification":
-            self.categorical(self.config.DEPENDENT_VARIABLE)
+            fig = self.categorical(self.config.DEPENDENT_VARIABLE)
         else:
             print("Invalid Problem Type")
+            fig = None
+        return fig if return_fig else fig.show() if fig is not None else None
 
     def pairwise_scatter(self):
         """Plot pairwise scatter plots to visualize the continuous variables in the dataset"""
@@ -269,21 +271,22 @@ class VizardIn:
                 title=f"{y} vs {x}",
             ).show()
 
-    def pair_plot(self):
+    def pair_plot(self, return_fig=True):
         """Plot a pairplot to vizualize the complete DataFrame"""
         if self.config.PROBLEM_TYPE == "classification":
-            px.scatter_matrix(
+            fig = px.scatter_matrix(
                 self.data,
                 dimensions=self.config.CONTINUOUS_INDEPENDENT_VARIABLES,
                 color=self.config.DEPENDENT_VARIABLE,
                 title="Pair Plot",
-            ).show()
+            )
         elif self.config.PROBLEM_TYPE == "regression":
-            px.scatter_matrix(
+            fig = px.scatter_matrix(
                 self.data,
                 dimensions=self.config.CONTINUOUS_INDEPENDENT_VARIABLES,
                 title="Pair Plot",
-            ).show()
+            )
+        return fig if return_fig else fig.show() if fig is not None else None
 
     def categorical_variables(self):
         """Create bivariate visualizations for the categorical variables with the target variable"""
@@ -307,23 +310,23 @@ class VizardIn:
         else:
             pass
 
-    def corr_plot(self, method='pearson'):
+    def corr_plot(self, method="pearson", return_fig=True):
         """Plot a heatmap to vizualize the correlation between the various continuous columns in the DataFrame
-            :param method: the method of correlation {'pearson', 'kendall', 'spearman'}
+        :param method: the method of correlation {'pearson', 'kendall', 'spearman'}
         """
         corr = self.data.corr(method=method)
         fig = px.imshow(
             corr, color_continuous_scale="blues", title="Pearson Correlation"
         )
-        fig.show()
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def point_biserial_plot(self):
+    def point_biserial_plot(self, return_fig=True):
         """Plot a heatmap to visualize point biserial correaltion between continuous and categorical variables"""
         num_cols = self.config.CONTINUOUS_INDEPENDENT_VARIABLES[:]
-        if self.config.PROBLEM_TYPE == 'regression':
+        if self.config.PROBLEM_TYPE == "regression":
             num_cols.append(self.config.DEPENDENT_VARIABLE)
         cat_cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
-        if self.config.PROBLEM_TYPE == 'classification':
+        if self.config.PROBLEM_TYPE == "classification":
             cat_cols.append(self.config.DEPENDENT_VARIABLE)
 
         pb_table = np.zeros((len(cat_cols), len(num_cols)))
@@ -333,16 +336,17 @@ class VizardIn:
                 pb_table[i][j] = pointbiserialr(
                     LabelEncoder().fit_transform(df_[cat_cols[i]]), df_[num_cols[j]]
                 )[0]
-        
-        px.imshow(
-            pd.DataFrame(pb_table, index=cat_cols, columns=num_cols),
-            color_continuous_scale="rdbu", title="Point Biserial Plot"
-        ).show()
-        
 
-    def chi_sq_plot(self, statistic='Chi Sq', figsize=(10, 10)):
+        fig = px.imshow(
+            pd.DataFrame(pb_table, index=cat_cols, columns=num_cols),
+            color_continuous_scale="rdbu",
+            title="Point Biserial Plot",
+        )
+        return fig if return_fig else fig.show() if fig is not None else None
+
+    def chi_sq_plot(self, statistic="Chi Sq", figsize=(10, 10), return_fig=True):
         """Plot a heatmap to vizualize the chi 2 statistic between the various categorical columns in the DataFrame
-            :param statistic: the statistic to plot {"Chi Sq", "Phi", "Cramer's V", "Tschuprow's T", "Contingency Coefficient"}
+        :param statistic: the statistic to plot {"Chi Sq", "Phi", "Cramer's V", "Tschuprow's T", "Contingency Coefficient"}
         """
 
         cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
@@ -354,29 +358,39 @@ class VizardIn:
 
         for i in range(n):
             for j in range(n):
-                crss_tab = pd.crosstab(index=self.data[cols[i]], columns=self.data[cols[j]])
+                crss_tab = pd.crosstab(
+                    index=self.data[cols[i]], columns=self.data[cols[j]]
+                )
                 chi2 = chi2_contingency(crss_tab)[0]
                 crss_sum = np.sum(np.sum(crss_tab))
-                if statistic == 'Chi Sq':
+                if statistic == "Chi Sq":
                     chi_table[i][j] = chi2
-                elif statistic == 'Phi':
-                    chi_table[i][j] = np.sqrt(chi2/crss_sum)
+                elif statistic == "Phi":
+                    chi_table[i][j] = np.sqrt(chi2 / crss_sum)
                 elif statistic == "Cramer's V":
-                    chi_table[i][j] = np.sqrt(chi2 / (crss_sum * (min(crss_tab.shape) - 1)))
+                    chi_table[i][j] = np.sqrt(
+                        chi2 / (crss_sum * (min(crss_tab.shape) - 1))
+                    )
                 elif statistic == "Tschuprow's T":
-                    chi_table[i][j] = np.sqrt(chi2 / (crss_sum * np.sqrt((crss_tab.shape[0] - 1)*(crss_tab.shape[1] - 1))))
-                elif statistic == 'Contingency Coefficient':
-                    chi_table[i][j] = np.sqrt(chi2/(crss_sum + chi2))
+                    chi_table[i][j] = np.sqrt(
+                        chi2
+                        / (
+                            crss_sum
+                            * np.sqrt((crss_tab.shape[0] - 1) * (crss_tab.shape[1] - 1))
+                        )
+                    )
+                elif statistic == "Contingency Coefficient":
+                    chi_table[i][j] = np.sqrt(chi2 / (crss_sum + chi2))
 
         chi_table = pd.DataFrame(chi_table, columns=cols, index=cols)
         fig = px.imshow(
             chi_table, color_continuous_scale="blues", title="Chi Square Values"
         )
 
-        fig.show()
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def wordcloud(self):
-        """Plot word clouds for the text variables and grouped word clouds if the problem is a classification one"""
+    def wordcloud(self, return_fig=True):
+        """Plot word clouds for the text variables"""
         n_rows = ceil(len(self.config.TEXT_VARIABLES) / 2)
         fig = plt.figure(figsize=(20, 6 * n_rows))
         for i, col in enumerate(self.config.TEXT_VARIABLES):
@@ -385,85 +399,58 @@ class VizardIn:
                 col,
                 fig.add_subplot(n_rows, 2, i + 1),
             )
-        plt.show()
-        if self.config.PROBLEM_TYPE == "classification":
-            n_rows = ceil(
-                (
-                    len(self.config.TEXT_VARIABLES)
-                    * self.data[self.config.DEPENDENT_VARIABLE].nunique()
-                )
-                / 2
-            )
-            fig = plt.figure(figsize=(20, 6 * n_rows))
-            i = 0
-            for col in self.config.TEXT_VARIABLES:
-                for label in sorted(self.data[self.config.DEPENDENT_VARIABLE].unique()):
-                    i += 1
-                    self._wc(
-                        " ".join(
-                            self.data[
-                                self.data[self.config.DEPENDENT_VARIABLE] == label
-                            ][col]
-                            .fillna("")
-                            .values
-                        ),
-                        f"{col} ({label})",
-                        fig.add_subplot(n_rows, 2, i),
-                    )
-            plt.show()
+        return fig if return_fig else plt.show()
 
-    def wordcloud_freq(self):
-        """Plot word clouds for the text variables and grouped word clouds for the words unique to each group
-        if the problem is a classification one"""
-        n_rows = ceil(len(self.config.TEXT_VARIABLES) / 2)
+    def wordcloud_by_group(self, group_by=None, return_fig=True):
+        """Plot grouped Word Clouds for the text variables"""
+        n_rows = ceil(
+            (len(self.config.TEXT_VARIABLES) * self.data[group_by].nunique()) / 2
+        )
         fig = plt.figure(figsize=(20, 6 * n_rows))
-        for i, col in enumerate(self.config.TEXT_VARIABLES):
-            self._wc_freq(
-                Counter((" ".join(self.data[col].fillna("").values)).split()),
-                col,
-                fig.add_subplot(n_rows, 2, i + 1),
-            )
-        plt.show()
-        if self.config.PROBLEM_TYPE == "classification":
-            n_rows = ceil(
-                (
-                    len(self.config.TEXT_VARIABLES)
-                    * self.data[self.config.DEPENDENT_VARIABLE].nunique()
+        i = 0
+        for col in self.config.TEXT_VARIABLES:
+            for label in sorted(self.data[group_by].unique()):
+                i += 1
+                self._wc(
+                    " ".join(
+                        self.data[self.data[group_by] == label][col].fillna("").values
+                    ),
+                    f"{col} ({label})",
+                    fig.add_subplot(n_rows, 2, i),
                 )
-                / 2
-            )
-            fig = plt.figure(figsize=(20, 6 * n_rows))
-            i = 0
-            for col in self.config.TEXT_VARIABLES:
-                for label in sorted(self.data[self.config.DEPENDENT_VARIABLE].unique()):
-                    i += 1
-                    self._wc_freq(
-                        (
-                            Counter(
-                                " ".join(
-                                    self.data[
-                                        self.data[self.config.DEPENDENT_VARIABLE]
-                                        == label
-                                    ][col]
-                                    .fillna("")
-                                    .values
-                                ).split()
-                            )
-                            - Counter(
-                                " ".join(
-                                    self.data[
-                                        self.data[self.config.DEPENDENT_VARIABLE]
-                                        != label
-                                    ][col]
-                                    .fillna("")
-                                    .values
-                                ).split()
-                            )
-                        ),
-                        f"{col} ({label})",
-                        fig.add_subplot(n_rows, 2, i),
-                    )
-            plt.show()
+        return fig if return_fig else plt.show()
+
+    def wordcloud_freq(self, group_by=None, return_fig=True):
+        """Plot grouped word clouds for the words unique to each group"""
+        n_rows = ceil(
+            (len(self.config.TEXT_VARIABLES) * self.data[group_by].nunique()) / 2
+        )
+        fig = plt.figure(figsize=(20, 6 * n_rows))
+        i = 0
+        for col in self.config.TEXT_VARIABLES:
+            for label in sorted(self.data[group_by].unique()):
+                i += 1
+                self._wc_freq(
+                    (
+                        Counter(
+                            " ".join(
+                                self.data[self.data[group_by] == label][col]
+                                .fillna("")
+                                .values
+                            ).split()
+                        )
+                        - Counter(
+                            " ".join(
+                                self.data[self.data[group_by] != label][col]
+                                .fillna("")
+                                .values
+                            ).split()
+                        )
+                    ),
+                    f"{col} ({label})",
+                    fig.add_subplot(n_rows, 2, i),
+                )
+        return fig if return_fig else plt.show()
 
     def _wc(self, text, label, ax):
         wordcloud = WordCloud(height=600, width=1000, stopwords=STOPWORDS).generate(
@@ -485,71 +472,81 @@ class VizardIn:
         ax.yaxis.set_visible(False)
         return ax
 
-    def trivariate_bubbleplot(self, x, y, s):
+    def trivariate_bubbleplot(self, x, y, s, return_fig=True):
         """Plot a trivariate bubbleplot with three continuous variables
         :param x: continuous variable
         :param y: continuous variable
         :param s: continuous variable
         """
         num_cols = self.config.CONTINUOUS_INDEPENDENT_VARIABLES[:]
-        if self.config.PROBLEM_TYPE == 'regression':
+        if self.config.PROBLEM_TYPE == "regression":
             num_cols.append(self.config.DEPENDENT_VARIABLE)
         cat_cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
-        if self.config.PROBLEM_TYPE == 'classification':
+        if self.config.PROBLEM_TYPE == "classification":
             cat_cols.append(self.config.DEPENDENT_VARIABLE)
         if x in num_cols and y in num_cols and s in num_cols:
-            px.scatter(
+            fig = px.scatter(
                 self.data,
                 x=x,
                 y=y,
                 size=s,
                 title=f"{y} vs {x} vs {s}",
-            ).show()
+            )
         else:
-            print('x, y and s should be continuous variables')
+            print("x, y and s should be continuous variables")
+            fig = None
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def trivariate_scatterplot(self, x, y, c):
+    def trivariate_scatterplot(self, x, y, c, return_fig=True):
         """Plot a trivariate scatterplot with two continuous variables and a categorical variable
         :param x: continuous variable
         :param y: continuous variable
         :param c: categorical variable
         """
         num_cols = self.config.CONTINUOUS_INDEPENDENT_VARIABLES[:]
-        if self.config.PROBLEM_TYPE == 'regression':
+        if self.config.PROBLEM_TYPE == "regression":
             num_cols.append(self.config.DEPENDENT_VARIABLE)
         cat_cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
-        if self.config.PROBLEM_TYPE == 'classification':
+        if self.config.PROBLEM_TYPE == "classification":
             cat_cols.append(self.config.DEPENDENT_VARIABLE)
         if x in num_cols and y in num_cols and c in cat_cols:
-            px.scatter(
+            fig = px.scatter(
                 self.data,
                 x=x,
                 y=y,
                 color=c,
                 title=f"{y} vs {x} vs {c}",
-            ).show()
+            )
         else:
-            print('x and y should be continuous variables and c should be a categorical variable')
+            print(
+                "x and y should be continuous variables and c should be a categorical variable"
+            )
+            fig = None
+        return fig if return_fig else fig.show() if fig is not None else None
 
-    def trivariate_violinplot(self, x, y, c):
+    def trivariate_violinplot(self, x, y, c, return_fig=True):
         """Plot a trivariate violinplot with two categorical variables and a continuous variable
         :param x: categorical variable
         :param y: continuous variable
         :param c: categorical variable
         """
         num_cols = self.config.CONTINUOUS_INDEPENDENT_VARIABLES[:]
-        if self.config.PROBLEM_TYPE == 'regression':
+        if self.config.PROBLEM_TYPE == "regression":
             num_cols.append(self.config.DEPENDENT_VARIABLE)
         cat_cols = self.config.CATEGORICAL_INDEPENDENT_VARIABLES[:]
-        if self.config.PROBLEM_TYPE == 'classification':
+        if self.config.PROBLEM_TYPE == "classification":
             cat_cols.append(self.config.DEPENDENT_VARIABLE)
         if x in cat_cols and y in num_cols and c in cat_cols:
-            px.violin(
+            fig = px.violin(
                 self.data,
                 x=x,
                 y=y,
                 color=c,
                 title=f"{y} vs {x} vs {c}",
-            ).show()
+            )
         else:
-            print('x and c should be categorical variables and y should be a continuous variable')
+            print(
+                "x and c should be categorical variables and y should be a continuous variable"
+            )
+            fig = None
+        return fig if return_fig else fig.show() if fig is not None else None

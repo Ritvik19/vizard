@@ -73,6 +73,8 @@ Based on the type of problem, preform segmented univariate analysis of all featu
   
         viz.wordcloud()
 
+        viz.wordcloud_by_group()
+
         viz.wordcloud_freq()
 
 ### Bivariate Analysis
