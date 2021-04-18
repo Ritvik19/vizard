@@ -265,28 +265,46 @@ class Vizard:
             )
             g.fig.suptitle("Pairplot", fontsize=24, y=1.08)
             return g if return_fig else plt.show()
+        elif self.config.PROBLEM_TYPE == "unsupervised":
+            g = sns.pairplot(
+                data=self.data[
+                    self.config.CONTINUOUS_INDEPENDENT_VARIABLES
+                ]
+            )
+            g.fig.suptitle("Pairplot", fontsize=24, y=1.08)
+            return g if return_fig else plt.show()
         else:
             pass
 
     def categorical_variables(self):
-        """Create bivariate visualizations for the categorical variables with the target variable"""
+        """Create bivariate visualizations for the categorical variables with the target variable or
+            or univariate visualizations in case of unservised problems
+        """
         if self.config.PROBLEM_TYPE == "regression":
             for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES:
                 self.categorical_vs_continuous(col, self.config.DEPENDENT_VARIABLE)
         elif self.config.PROBLEM_TYPE == "classification":
             for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES:
                 self.categorical_vs_categorical(col, self.config.DEPENDENT_VARIABLE)
+        elif self.config.PROBLEM_TYPE == 'unsupervised':
+            for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES:
+                self.categorical(col)
         else:
             pass
 
     def continuous_variables(self):
-        """Create bivariate visualizations for the continuous variables with the target variable"""
+        """Create bivariate visualizations for the continuous variables with the target variable
+            or univariate visualizations in case of unservised problems
+        """
         if self.config.PROBLEM_TYPE == "regression":
             for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES:
                 self.continuous_vs_continuous(col, self.config.DEPENDENT_VARIABLE)
         elif self.config.PROBLEM_TYPE == "classification":
             for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES:
                 self.continuous_vs_categorical(col, self.config.DEPENDENT_VARIABLE)
+        elif self.config.PROBLEM_TYPE == 'unsupervised':
+            for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES:
+                self.continuous(col)
         else:
             pass
 

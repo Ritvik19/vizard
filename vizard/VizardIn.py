@@ -283,6 +283,12 @@ class VizardIn:
         elif self.config.PROBLEM_TYPE == "regression":
             fig = px.scatter_matrix(
                 self.data,
+                dimensions=self.config.CONTINUOUS_INDEPENDENT_VARIABLES+[self.config.DEPENDENT_VARIABLE],
+                title="Pair Plot",
+            )
+        elif self.config.PROBLEM_TYPE == "unsupervised":
+            fig = px.scatter_matrix(
+                self.data,
                 dimensions=self.config.CONTINUOUS_INDEPENDENT_VARIABLES,
                 title="Pair Plot",
             )
@@ -300,6 +306,9 @@ class VizardIn:
                 self.categorical_vs_categorical(
                     col, self.config.DEPENDENT_VARIABLE
                 ).show()
+        elif self.config.PROBLEM_TYPE == "unsupervised":
+            for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES:
+                self.categorical(col).show()
         else:
             pass
 
@@ -315,6 +324,9 @@ class VizardIn:
                 self.continuous_vs_categorical(
                     col, self.config.DEPENDENT_VARIABLE
                 ).show()
+        elif self.config.PROBLEM_TYPE == "unsupervised":
+            for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES:
+                self.continuous(col).show()
         else:
             pass
 

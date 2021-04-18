@@ -21,7 +21,7 @@ The Vizard or VizardIn object holds the `DataFrame` along with its configuration
     import vizard
 
     class config:
-        PROBLEM_TYPE = 'regression' or 'classification'
+        PROBLEM_TYPE = 'regression' or 'classification' or 'unsupervised'
         DEPENDENT_VARIABLE = 'target_variable'
         CATEGORICAL_INDEPENDENT_VARIABLES = [categorical_features]
         CONTINUOUS_INDEPENDENT_VARIABLES = [continuous features]
@@ -128,5 +128,7 @@ Based on the type of variables, perform correaltion analysis on all the feature 
 1. [Classification Case](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Classification%20Case.ipynb)
 2. [Regression Case](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Regression%20Case.ipynb)
 3. [Text Classification Case](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Text%20Classification%20Case.ipynb)
-4. [Classification Case (Interactive)](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Classification%20Interactive%20Case.ipynb)
-5. [Regression Case (Interactive)](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Regression%20Interactive%20Case.ipynb)
+4. [Unsupervised Case](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Unsupervised%20Case.ipynb)
+5. [Classification Case (Interactive)](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Classification%20Interactive%20Case.ipynb)
+6. [Regression Case (Interactive)](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Regression%20Interactive%20Case.ipynb)
+7. [Unsupervised Case (Interactive)](https://nbviewer.jupyter.org/github/Ritvik19/vizard-doc/blob/main/usage/Unsupervised%20Interactive%20Case.ipynb)
