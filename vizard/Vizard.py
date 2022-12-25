@@ -276,37 +276,34 @@ class Vizard:
         else:
             pass
 
-    def categorical_variables(self):
+    def categorical_variables(self, return_fig=True):
         """Create bivariate visualizations for the categorical variables with the target variable or
             or univariate visualizations in case of unservised problems
         """
         if self.config.PROBLEM_TYPE == "regression":
-            for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES:
-                self.categorical_vs_continuous(col, self.config.DEPENDENT_VARIABLE)
+            ret = [self.categorical_vs_continuous(col, self.config.DEPENDENT_VARIABLE, return_fig=return_fig) for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES]
         elif self.config.PROBLEM_TYPE == "classification":
-            for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES:
-                self.categorical_vs_categorical(col, self.config.DEPENDENT_VARIABLE)
+            ret = [self.categorical_vs_categorical(col, self.config.DEPENDENT_VARIABLE, return_fig=return_fig) for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES]
         elif self.config.PROBLEM_TYPE == 'unsupervised':
-            for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES:
-                self.categorical(col)
+            ret = [self.categorical(col) for col in self.config.CATEGORICAL_INDEPENDENT_VARIABLES]
         else:
             pass
+        return ret if return_fig else None
 
-    def continuous_variables(self):
+    def continuous_variables(self, return_fig=True):
         """Create bivariate visualizations for the continuous variables with the target variable
             or univariate visualizations in case of unservised problems
         """
         if self.config.PROBLEM_TYPE == "regression":
-            for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES:
-                self.continuous_vs_continuous(col, self.config.DEPENDENT_VARIABLE)
+            ret = [self.continuous_vs_continuous(col, self.config.DEPENDENT_VARIABLE, return_fig=return_fig) for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES]
         elif self.config.PROBLEM_TYPE == "classification":
-            for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES:
-                self.continuous_vs_categorical(col, self.config.DEPENDENT_VARIABLE)
+            ret = [self.continuous_vs_categorical(col, self.config.DEPENDENT_VARIABLE, return_fig=return_fig) for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES]
+                
         elif self.config.PROBLEM_TYPE == 'unsupervised':
-            for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES:
-                self.continuous(col)
+            ret = [self.continuous(col) for col in self.config.CONTINUOUS_INDEPENDENT_VARIABLES]
         else:
             pass
+        return ret if return_fig else None
 
     def corr_plot(self, figsize=(10, 10), method="pearson", return_fig=True):
         """Plot a heatmap to vizualize the correlation between the various continuous columns in the DataFrame
